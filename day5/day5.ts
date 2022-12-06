@@ -1,3 +1,26 @@
+export interface IMoveInPlaceStrategy {
+  move(from : string[], to: string[], amount: number) : void;
+} 
+
+export class PopAndPushStrategy implements IMoveInPlaceStrategy {
+  move(from: string[],to: string[],amount: number): void {
+    for (let i = 0; i < amount; i++) {
+      const fromValue = from.pop();
+      if (fromValue === undefined) {
+        throw "we removed too much from a stack!";
+      }
+      to.push(fromValue);        
+    }
+  }
+}
+
+export class SpliceAndPushStrategy implements IMoveInPlaceStrategy {
+  move(from: string[],to: string[],amount: number): void {
+      const crates = from.splice(from.length - amount, from.length);
+      to.push(...crates);
+  }
+}
+
 export class Simulation {
   constructor(public stacks: string[][], public commands: string[]) {
   }
@@ -12,37 +35,13 @@ export class Simulation {
     return new Simulation(stacks, commands);
   }
 
-  execute() : string {
+  execute(moveStrategy : IMoveInPlaceStrategy) : string {
     this.commands.forEach(command => {
       const instructions = command.split(",").map(c => parseInt(c));
       const move = instructions[0];
       const fromStack = instructions[1] - 1;
       const toStack = instructions[2] - 1;
-      for (let i = 0; i < move; i++) {
-        const fromValue = this.stacks[fromStack].pop();
-        if (fromValue === undefined) {
-          throw "we removed too much from a stack!";
-        }
-        this.stacks[toStack].push(fromValue);        
-      }
-    });
-
-    return this.stacks.map(s => s.pop()).join("");
-  }
-
-  execute2() : string {
-    this.commands.forEach(command => {
-      const instructions = command.split(",").map(c => parseInt(c));
-      const move = instructions[0];
-      const fromStackIndex = instructions[1] - 1;
-      const toStackIndex = instructions[2] - 1;
-
-      console.log(`fromStackINdex ${fromStackIndex}`);
-      const fromStack = this.stacks[fromStackIndex];
-      console.log(fromStack);
-      const crates = fromStack.splice(fromStack.length - move, fromStack.length);
-      //console.log(crates);
-      this.stacks[toStackIndex].push(...crates);
+      moveStrategy.move(this.stacks[fromStack], this.stacks[toStack], move);
     });
 
     return this.stacks.map(s => s.pop()).join("");
@@ -54,13 +53,13 @@ if (import.meta.main) {
   const text = await Deno.readTextFile("./data.txt");
   const sim = Simulation.Create(text);
 
-  const result1 = sim.execute();
+  const result1 = sim.execute(new PopAndPushStrategy());
 
   console.log(`part1: ${result1}`);
 
   const sim2 = Simulation.Create(text);
 
-  const result2 = sim2.execute2();
+  const result2 = sim2.execute(new SpliceAndPushStrategy());
 
   console.log(`part2: ${result2}`);
 }

@@ -1,5 +1,5 @@
 import { assertArrayIncludes, assertEquals } from "https://deno.land/std@0.166.0/testing/asserts.ts";
-import { Simulation } from "./day5.ts";
+import { PopAndPushStrategy, Simulation, SpliceAndPushStrategy } from "./day5.ts";
 
 Deno.test("create simple simulation from state", () => {
   const input = `ABC
@@ -74,7 +74,7 @@ const expectations = [
 
 CreateSimulations().forEach((sim, simIndex) => {
   Deno.test(`sim #${simIndex + 1} should return ${expectations[simIndex]}`, () => {
-    const result = sim.execute();
+    const result = sim.execute(new PopAndPushStrategy());
 
     assertEquals(result, expectations[simIndex]);
   });
@@ -87,7 +87,7 @@ const expectations2 = [
 
 CreateSimulations().forEach((sim, simIndex) => {
   Deno.test(`sim #${simIndex + 1} for part 2 should return ${expectations2[simIndex]}`, () => {
-    const result = sim.execute2();
+    const result = sim.execute(new SpliceAndPushStrategy());
 
     assertEquals(result, expectations2[simIndex]);
   });
