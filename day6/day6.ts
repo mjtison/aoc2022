@@ -1,16 +1,16 @@
 import { takeWhile } from "https://deno.land/std@0.117.0/collections/mod.ts";
 
 export function findIndexAfterNthUniqueCharacters(value: string, nth: number): number {
-  const last4Characters : string[] = [];
+  const lastNthCharacters : string[] = [];
   const stringBeforeMarker = takeWhile<string>([...value], (char: string) => {
-    if (last4Characters.length >= nth)
-      last4Characters.shift();
-    last4Characters.push(char);
+    if (lastNthCharacters.length >= nth)
+      lastNthCharacters.shift();
+    lastNthCharacters.push(char);
 
-    if (last4Characters.length < nth) {
+    if (lastNthCharacters.length < nth) {
       return true;
     }
-    return new Set<string>([...last4Characters]).size < nth;
+    return new Set<string>([...lastNthCharacters]).size < nth;
   });
   return stringBeforeMarker.length;
 }
